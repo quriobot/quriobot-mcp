@@ -6,8 +6,8 @@ This is an [MCP](https://modelcontextprotocol.io) server over the Quriobot API, 
 control.quriobot.com itself runs on, acting with your own API key. It runs on your machine,
 needs Node.js 18 or later, and has no dependencies.
 
-Every setup below runs it the recommended way, `npx -y @quriobot/mcp`: npx fetches the newest
-release when your agent starts the server, so updates reach you without doing anything.
+Every setup below runs it the recommended way, `npx -y @quriobot/mcp@latest`: npx fetches the
+newest release when your agent starts the server, so updates reach you without doing anything.
 
 ## Your API key
 
@@ -19,7 +19,7 @@ was last used. Every setup below gives it to the server as `QURIOBOT_API_KEY`.
 
 ### Claude Code
 
-The plugin runs `npx -y @quriobot/mcp` too. It asks for the key while installing and keeps it in
+The plugin runs `npx -y @quriobot/mcp@latest` too. It asks for the key while installing and keeps it in
 Claude Code's credential store (the macOS keychain, or `~/.claude/.credentials.json`), not in a
 settings file:
 
@@ -49,7 +49,7 @@ In `.vscode/mcp.json`; VS Code asks for the key once and stores it securely:
     "quriobot": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@quriobot/mcp"],
+      "args": ["-y", "@quriobot/mcp@latest"],
       "env": { "QURIOBOT_API_KEY": "${input:quriobot-key}" }
     }
   }
@@ -67,7 +67,7 @@ They take the same entry under `mcpServers`: Claude Desktop in `claude_desktop_c
   "mcpServers": {
     "quriobot": {
       "command": "npx",
-      "args": ["-y", "@quriobot/mcp"],
+      "args": ["-y", "@quriobot/mcp@latest"],
       "env": { "QURIOBOT_API_KEY": "your API key" }
     }
   }
@@ -81,7 +81,7 @@ In `~/.codex/config.toml`:
 ```toml
 [mcp_servers.quriobot]
 command = "npx"
-args = ["-y", "@quriobot/mcp"]
+args = ["-y", "@quriobot/mcp@latest"]
 env = { QURIOBOT_API_KEY = "your API key" }
 ```
 

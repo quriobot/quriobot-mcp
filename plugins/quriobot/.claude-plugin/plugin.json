@@ -17,10 +17,9 @@
   },
   "mcpServers": {
     "quriobot": {
-      "command": "npx",
+      "command": "node",
       "args": [
-        "-y",
-        "@quriobot/mcp"
+        "${CLAUDE_PLUGIN_ROOT}/launch.mjs"
       ],
       "env": {
         "QURIOBOT_API_KEY": "${user_config.api_key}"
