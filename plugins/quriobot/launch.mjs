@@ -9,20 +9,28 @@
 import { spawn } from 'node:child_process'
 
 const stdio = ['inherit', 'pipe', 'inherit']
+// With the network silently down npm can wait minutes, longer than a client waits for a server to
+// start: npm gives up sooner (no retries), and a launch that has not answered within 15 s (a
+// normal one answers within about a second) is stopped and the shipped copy answers instead.
+const env = { ...process.env, npm_config_fetch_retries: '0', npm_config_fetch_timeout: '10000' }
 const child = process.platform === 'win32'
-  ? spawn('npx -y @quriobot/mcp@latest', { shell: true, stdio })
-  : spawn('npx', ['-y', '@quriobot/mcp@latest'], { stdio })
+  ? spawn('npx -y @quriobot/mcp@latest', { shell: true, stdio, env })
+  : spawn('npx', ['-y', '@quriobot/mcp@latest'], { stdio, env })
 
 let answered = false
 let fellBack = false
 function fallBack() {
   if (answered || fellBack) return
   fellBack = true
+  clearTimeout(deadline)
+  child.kill()
   import('./server.mjs')
 }
+const deadline = setTimeout(fallBack, 15_000)
 
 child.stdout.on('data', (chunk) => {
   answered = true
+  clearTimeout(deadline)
   process.stdout.write(chunk)
 })
 child.on('error', fallBack)
