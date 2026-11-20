@@ -1,0 +1,31 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.quriobot/quriobot-mcp",
+  "title": "Quriobot",
+  "description": "Quriobot's backoffice API for AI agents: live chats, bots, responses, contacts, with your API key.",
+  "repository": {
+    "url": "https://github.com/quriobot/quriobot-mcp",
+    "source": "github"
+  },
+  "websiteUrl": "https://quriobot.com",
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@quriobot/mcp",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "QURIOBOT_API_KEY",
+          "description": "Your Quriobot API key: control.quriobot.com, Profile → API keys",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        }
+      ]
+    }
+  ]
+}
