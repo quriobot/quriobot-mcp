@@ -1,0 +1,30 @@
+{
+  "name": "@quriobot/mcp",
+  "version": "0.1.0",
+  "description": "Your Quriobot account as MCP tools for any AI agent, through the Quriobot API and your own API key",
+  "type": "module",
+  "bin": {
+    "quriobot-mcp": "plugins/quriobot/server.mjs"
+  },
+  "files": [
+    "plugins/quriobot/server.mjs"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "mcpName": "io.github.quriobot/quriobot-mcp",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quriobot/quriobot-mcp.git"
+  },
+  "homepage": "https://github.com/quriobot/quriobot-mcp#readme",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "quriobot",
+    "chatbot",
+    "live-chat",
+    "ai-agent"
+  ],
+  "license": "MIT"
+}

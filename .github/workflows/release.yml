@@ -1,0 +1,65 @@
+name: Release
+
+# A tag vX.Y.Z publishes that version to npm (trusted publishing: no token is stored, the package
+# carries a provenance attestation) and to the MCP Registry (logged in with this workflow's GitHub
+# identity). The tag, package.json, the plugin's manifest and server.json must all name it.
+#
+# npm sets up a trusted publisher only on a package that exists, so a package's first version is
+# published by hand by an owner of the npm organisation before its tag is pushed. The workflow skips
+# the npm step for a version npm already has, and still registers it.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  MCP_PUBLISHER: https://github.com/modelcontextprotocol/registry/releases/download/v1.8.8/mcp-publisher_linux_amd64.tar.gz
+  MCP_PUBLISHER_SHA256: 09f1fa70ee146b640584274a1a6b2b8a0310b05d4321fa9224e6df6a016d67f4
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - name: Every file names the tag's version, and the registry entry matches the package
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          for q in 'package.json .version' 'plugins/quriobot/.claude-plugin/plugin.json .version' \
+                   'server.json .version' 'server.json .packages[0].version'; do
+            set -- $q
+            got=$(jq -r "$2" "$1"); [ "$got" = "$v" ] || { echo "$1 $2 is $got, not $v"; exit 1; }
+          done
+          [ "$(jq -r .name package.json)" = "$(jq -r '.packages[0].identifier' server.json)" ] \
+            || { echo "server.json names another npm package than package.json"; exit 1; }
+          [ "$(jq -r .mcpName package.json)" = "$(jq -r .name server.json)" ] \
+            || { echo "package.json's mcpName is not server.json's name"; exit 1; }
+          [ "$(jq -r '.description | length' server.json)" -le 100 ] \
+            || { echo "server.json's description is over the registry's 100 characters"; exit 1; }
+      - name: The server starts and says its version
+        run: |
+          echo '{"jsonrpc":"2.0","id":1,"method":"initialize"}' | node plugins/quriobot/server.mjs \
+            | jq -e --arg v "${GITHUB_REF_NAME#v}" '.result.serverInfo.version == $v'
+      - name: Publish to npm
+        run: |
+          name=$(jq -r .name package.json); v="${GITHUB_REF_NAME#v}"
+          # Asked without credentials: setup-node's .npmrc sends a placeholder token otherwise.
+          code=$(curl -s -o /dev/null -w '%{http_code}' "https://registry.npmjs.org/$(jq -rn --arg n "$name" '$n|@uri')/$v")
+          case $code in
+            200) echo "$name@$v is already on npm" ;;
+            404) npm install -g npm@11 && npm publish --provenance --access public ;;
+            *) echo "npm answered $code for $name@$v"; exit 1 ;;
+          esac
+      - name: Publish to the MCP Registry
+        run: |
+          curl -fsSL -o mcp-publisher.tar.gz "$MCP_PUBLISHER"
+          echo "$MCP_PUBLISHER_SHA256  mcp-publisher.tar.gz" | sha256sum -c -
+          tar xzf mcp-publisher.tar.gz mcp-publisher
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish

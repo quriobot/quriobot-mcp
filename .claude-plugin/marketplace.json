@@ -1,0 +1,13 @@
+{
+  "name": "quriobot",
+  "owner": {
+    "name": "Quriobot"
+  },
+  "plugins": [
+    {
+      "name": "quriobot",
+      "source": "./plugins/quriobot",
+      "description": "Your Quriobot account as tools, through the Quriobot API and your own API key"
+    }
+  ]
+}

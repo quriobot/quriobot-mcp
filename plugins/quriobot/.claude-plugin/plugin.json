@@ -1,0 +1,31 @@
+{
+  "name": "quriobot",
+  "version": "0.1.0",
+  "description": "Your Quriobot account in Claude Code, through the Quriobot API and your own API key",
+  "author": {
+    "name": "Quriobot",
+    "url": "https://quriobot.com"
+  },
+  "homepage": "https://quriobot.com",
+  "userConfig": {
+    "api_key": {
+      "type": "string",
+      "title": "Quriobot API key",
+      "description": "Create one in control.quriobot.com: Profile → API keys. It acts as you, in every organisation you are a member of.",
+      "sensitive": true
+    }
+  },
+  "mcpServers": {
+    "quriobot": {
+      "command": "node",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/server.mjs"
+      ],
+      "env": {
+        "QURIOBOT_API_KEY": "${user_config.api_key}"
+      }
+    }
+  },
+  "license": "MIT",
+  "repository": "https://github.com/quriobot/quriobot-mcp"
+}
