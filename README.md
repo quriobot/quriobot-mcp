@@ -19,9 +19,9 @@ was last used. Every setup below gives it to the server as `QURIOBOT_API_KEY`.
 
 ### Claude Code
 
-The plugin runs `npx -y @quriobot/mcp@latest` too. It asks for the key while installing and keeps it in
-Claude Code's credential store (the macOS keychain, or `~/.claude/.credentials.json`), not in a
-settings file:
+The plugin runs `npx -y @quriobot/mcp@latest` too. It asks for the key while installing and
+keeps it in Claude Code's credential store (the macOS keychain, or `~/.claude/.credentials.json`),
+not in a settings file:
 
 ```
 /plugin marketplace add quriobot/quriobot-mcp
