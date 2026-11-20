@@ -1,6 +1,6 @@
 {
   "name": "quriobot",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Your Quriobot account in Claude Code, through the Quriobot API and your own API key",
   "author": {
     "name": "Quriobot",
