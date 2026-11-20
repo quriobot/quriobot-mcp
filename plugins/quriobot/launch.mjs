@@ -27,7 +27,7 @@ function fallBack() {
   child.stdout.removeAllListeners('data')
   child.stdout.destroy()
   // On Windows the child is cmd.exe: end npx and anything it started with it.
-  if (process.platform === 'win32' && child.pid) spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' })
+  if (process.platform === 'win32' && child.pid) spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' }).on('error', () => child.kill())
   else child.kill()
   import('./server.mjs')
 }
