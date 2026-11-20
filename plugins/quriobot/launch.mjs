@@ -23,7 +23,12 @@ function fallBack() {
   if (answered || fellBack) return
   fellBack = true
   clearTimeout(deadline)
-  child.kill()
+  // Nothing late from npx may reach the client, nor keep this process alive.
+  child.stdout.removeAllListeners('data')
+  child.stdout.destroy()
+  // On Windows the child is cmd.exe: end npx and anything it started with it.
+  if (process.platform === 'win32' && child.pid) spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' })
+  else child.kill()
   import('./server.mjs')
 }
 const deadline = setTimeout(fallBack, 15_000)
