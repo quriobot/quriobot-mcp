@@ -62,9 +62,12 @@ jobs:
       - name: List in the MCP Registry, unless it has the version
         run: |
           name=$(jq -r .name server.json); v="${GITHUB_REF_NAME#v}"
-          listed=$(curl -fsS "https://registry.modelcontextprotocol.io/v0/servers?search=$(jq -rn --arg n "$name" '$n|@uri')" \
-            | jq -r --arg n "$name" --arg v "$v" '[.servers[]? | select((.server.name // .name) == $n) | (.server.version // .version)] | index($v) != null')
-          if [ "$listed" = true ]; then echo "$name $v is already listed"; exit 0; fi
+          code=$(curl -s -o /dev/null -w '%{http_code}' "https://registry.modelcontextprotocol.io/v0/servers/$(jq -rn --arg n "$name" '$n|@uri')/versions/$v")
+          case $code in
+            200) echo "$name $v is already listed"; exit 0 ;;
+            404) ;;
+            *) echo "the MCP Registry answered $code for $name $v"; exit 1 ;;
+          esac
           curl -fsSL -o mcp-publisher.tar.gz "$MCP_PUBLISHER"
           echo "$MCP_PUBLISHER_SHA256  mcp-publisher.tar.gz" | sha256sum -c -
           tar xzf mcp-publisher.tar.gz mcp-publisher
