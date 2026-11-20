@@ -1,11 +1,12 @@
 name: Release
 
-# A tag vX.Y.Z stages that version on npm (trusted publishing: no token is stored, the package
-# carries a provenance attestation). Nothing reaches users until an owner of the npm organisation
-# approves the staged version with their second factor (npmjs.com → Staged Packages, or `npm stage
-# approve`). Then this workflow is run again for the same tag (Actions → Release → Run workflow,
-# on the tag): npm has the version, so it lists it in the MCP Registry. The tag, package.json, the
-# plugin's manifest and server.json must all name the version.
+# A tag vX.Y.Z stages that version on npm (trusted publishing with provenance: no token is stored).
+# Nothing reaches users until an owner of the npm organisation approves the staged version with
+# their second factor (npmjs.com → Staged Packages, or `npm stage approve`). After the approval this
+# workflow is run again on the same tag (Actions → Release → Run workflow → the tag): npm has the
+# version, so it lists it in the MCP Registry. Run before the approval, it fails at the npm step,
+# since a staged version cannot be staged again. The tag, package.json, the plugin's manifest and
+# server.json must all name the version.
 on:
   push:
     tags: ['v*']
@@ -30,6 +31,7 @@ jobs:
           registry-url: https://registry.npmjs.org
       - name: Every file names the tag's version, and the registry entry matches the package
         run: |
+          [[ $GITHUB_REF == refs/tags/v* ]] || { echo "run this workflow on a v* tag, not $GITHUB_REF_NAME"; exit 1; }
           v="${GITHUB_REF_NAME#v}"
           for q in 'package.json .version' 'plugins/quriobot/.claude-plugin/plugin.json .version' \
                    'server.json .version' 'server.json .packages[0].version'; do
@@ -55,9 +57,7 @@ jobs:
           case $code in
             200) echo "$name@$v is on npm"; echo "published=true" >> "$GITHUB_OUTPUT" ;;
             404)
-              npm install -g npm@11
-              if npm stage list "$name" 2>/dev/null | grep -q "$v"; then echo "$name@$v is already staged"
-              else npm stage publish --provenance --access public; fi
+              npm install -g npm@11 && npm stage publish --provenance --access public
               echo "::notice::$name@$v is staged: approve it on npmjs.com (Staged Packages), then run this workflow again on $GITHUB_REF_NAME to list it in the MCP Registry"
               echo "published=false" >> "$GITHUB_OUTPUT" ;;
             *) echo "npm answered $code for $name@$v"; exit 1 ;;
