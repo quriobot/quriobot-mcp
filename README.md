@@ -45,7 +45,7 @@ In `.vscode/mcp.json`; VS Code asks for the key once and stores it securely:
     "quriobot": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "github:quriobot/quriobot-mcp#v0.1.0"],
+      "args": ["-y", "@quriobot/mcp"],
       "env": { "QURIOBOT_API_KEY": "${input:quriobot-key}" }
     }
   }
@@ -63,7 +63,7 @@ They take the same entry under `mcpServers`: Claude Desktop in `claude_desktop_c
   "mcpServers": {
     "quriobot": {
       "command": "npx",
-      "args": ["-y", "github:quriobot/quriobot-mcp#v0.1.0"],
+      "args": ["-y", "@quriobot/mcp"],
       "env": { "QURIOBOT_API_KEY": "your API key" }
     }
   }
@@ -77,7 +77,7 @@ In `~/.codex/config.toml`:
 ```toml
 [mcp_servers.quriobot]
 command = "npx"
-args = ["-y", "github:quriobot/quriobot-mcp#v0.1.0"]
+args = ["-y", "@quriobot/mcp"]
 env = { QURIOBOT_API_KEY = "your API key" }
 ```
 

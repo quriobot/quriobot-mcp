@@ -1,15 +1,16 @@
 name: Release
 
-# A tag vX.Y.Z publishes that version to npm (trusted publishing: no token is stored, the package
-# carries a provenance attestation) and to the MCP Registry (logged in with this workflow's GitHub
-# identity). The tag, package.json, the plugin's manifest and server.json must all name it.
-#
-# npm sets up a trusted publisher only on a package that exists, so a package's first version is
-# published by hand by an owner of the npm organisation before its tag is pushed. The workflow skips
-# the npm step for a version npm already has, and still registers it.
+# A tag vX.Y.Z stages that version on npm (trusted publishing with provenance: no token is stored).
+# Nothing reaches users until an owner of the npm organisation approves the staged version with
+# their second factor (npmjs.com → Staged Packages, or `npm stage approve`). After the approval this
+# workflow is run again on the same tag (Actions → Release → Run workflow → the tag): npm has the
+# version, so it lists it in the MCP Registry. Run before the approval, it fails at the npm step,
+# since a staged version cannot be staged again. The tag, package.json, the plugin's manifest and
+# server.json must all name the version.
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -30,6 +31,7 @@ jobs:
           registry-url: https://registry.npmjs.org
       - name: Every file names the tag's version, and the registry entry matches the package
         run: |
+          [[ $GITHUB_REF == refs/tags/v* ]] || { echo "run this workflow on a v* tag, not $GITHUB_REF_NAME"; exit 1; }
           v="${GITHUB_REF_NAME#v}"
           for q in 'package.json .version' 'plugins/quriobot/.claude-plugin/plugin.json .version' \
                    'server.json .version' 'server.json .packages[0].version'; do
@@ -46,17 +48,23 @@ jobs:
         run: |
           echo '{"jsonrpc":"2.0","id":1,"method":"initialize"}' | node plugins/quriobot/server.mjs \
             | jq -e --arg v "${GITHUB_REF_NAME#v}" '.result.serverInfo.version == $v'
-      - name: Publish to npm
+      - name: Stage on npm, unless npm already has the version
+        id: npm
         run: |
           name=$(jq -r .name package.json); v="${GITHUB_REF_NAME#v}"
           # Asked without credentials: setup-node's .npmrc sends a placeholder token otherwise.
           code=$(curl -s -o /dev/null -w '%{http_code}' "https://registry.npmjs.org/$(jq -rn --arg n "$name" '$n|@uri')/$v")
           case $code in
-            200) echo "$name@$v is already on npm" ;;
-            404) npm install -g npm@11 && npm publish --provenance --access public ;;
+            200) echo "$name@$v is on npm"; echo "published=true" >> "$GITHUB_OUTPUT" ;;
+            404)
+              npm install -g npm@11
+              npm stage publish --provenance --access public
+              echo "::notice::$name@$v is staged: approve it on npmjs.com (Staged Packages), then run this workflow again on $GITHUB_REF_NAME to list it in the MCP Registry"
+              echo "published=false" >> "$GITHUB_OUTPUT" ;;
             *) echo "npm answered $code for $name@$v"; exit 1 ;;
           esac
       - name: Publish to the MCP Registry
+        if: steps.npm.outputs.published == 'true'
         run: |
           curl -fsSL -o mcp-publisher.tar.gz "$MCP_PUBLISHER"
           echo "$MCP_PUBLISHER_SHA256  mcp-publisher.tar.gz" | sha256sum -c -
