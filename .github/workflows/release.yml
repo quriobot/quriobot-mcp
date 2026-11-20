@@ -71,5 +71,14 @@ jobs:
           curl -fsSL -o mcp-publisher.tar.gz "$MCP_PUBLISHER"
           echo "$MCP_PUBLISHER_SHA256  mcp-publisher.tar.gz" | sha256sum -c -
           tar xzf mcp-publisher.tar.gz mcp-publisher
-          ./mcp-publisher login github-oidc
-          ./mcp-publisher publish
+          # The registry checks that npm serves the version, which can take minutes after a publish:
+          # retry while that is all it refuses, fail on anything else. Each attempt logs in afresh, as
+          # the registry's token is short-lived.
+          for i in $(seq 10); do
+            ./mcp-publisher login github-oidc
+            if out=$(./mcp-publisher publish 2>&1); then echo "$out"; exit 0; fi
+            echo "$out"
+            grep -qF "version '$v' was not found" <<<"$out" || exit 1
+            [ "$i" = 10 ] && { echo "npm still does not serve $v to the registry after 5 minutes"; exit 1; }
+            sleep 30
+          done
