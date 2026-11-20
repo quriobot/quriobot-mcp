@@ -1,16 +1,17 @@
 #!/usr/bin/env node
 // Quriobot's MCP server: the Quriobot API, which is everything control.quriobot.com does, as four
-// tools over stdio (MCP's newline-delimited JSON-RPC), for any MCP client. It has no dependencies,
-// so it runs as copied: from the Claude Code plugin, or with npx. The API key comes from
-// QURIOBOT_API_KEY and goes only into the Authorization header of requests to the API's origin.
+// tools over stdio (MCP's newline-delimited JSON-RPC), for any MCP client. It is the npm package's
+// bin (`npx -y @quriobot/mcp@latest`), which the Claude Code plugin also runs (launch.mjs, with
+// this copy as its fallback). It has no dependencies. The API key comes from QURIOBOT_API_KEY and
+// goes only into the Authorization header of requests to the API's origin.
 
 import { readFileSync } from 'node:fs'
 import { createInterface } from 'node:readline'
 
 const API = new URL(process.env.QURIOBOT_API_URL || 'https://api.quriobot.com')
 const KEY = (process.env.QURIOBOT_API_KEY || '').trim()
-// The plugin's manifest where the Claude Code plugin runs, the package's where npm installed it; the
-// release checks that the two agree.
+// The package's version where npm installed it, the plugin manifest's in a checkout of the
+// repository (the release workflow's start check, which compares the two).
 const VERSION = ['./.claude-plugin/plugin.json', '../../package.json']
   .map((p) => { try { return JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8')).version } catch { return undefined } })
   .find(Boolean) || 'unknown'
