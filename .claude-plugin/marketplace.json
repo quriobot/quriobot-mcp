@@ -7,7 +7,7 @@
     {
       "name": "quriobot",
       "source": "./plugins/quriobot",
-      "description": "Quriobot's backoffice API as tools, with your API key"
+      "description": "Your Quriobot account as tools, through the Quriobot API and your own API key"
     }
   ]
 }

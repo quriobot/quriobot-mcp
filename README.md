@@ -2,8 +2,8 @@
 
 Work with your Quriobot account from any AI agent: answer live chats, read responses and contacts,
 look into a bot's settings, anything you do in [control.quriobot.com](https://control.quriobot.com).
-This is an [MCP](https://modelcontextprotocol.io) server over the Quriobot backoffice API, which is
-what control.quriobot.com itself runs on, acting with your own API key. It runs on your machine,
+This is an [MCP](https://modelcontextprotocol.io) server over the Quriobot API, which is what
+control.quriobot.com itself runs on, acting with your own API key. It runs on your machine,
 needs Node.js 18 or later, and has no dependencies.
 
 ## Your API key

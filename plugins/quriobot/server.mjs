@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Quriobot's MCP server: the backoffice API, which is everything control.quriobot.com does, as four
+// Quriobot's MCP server: the Quriobot API, which is everything control.quriobot.com does, as four
 // tools over stdio (MCP's newline-delimited JSON-RPC), for any MCP client. It has no dependencies,
 // so it runs as copied: from the Claude Code plugin, or with npx. The API key comes from
 // QURIOBOT_API_KEY and goes only into the Authorization header of requests to the API's origin.
@@ -19,7 +19,7 @@ const TIMEOUT_MS = 60_000
 const MAX_TEXT = 100_000
 const MAX_HITS = 40
 
-const INSTRUCTIONS = `Quriobot's backoffice API, as the user whose API key the server holds: whatever they can do in control.quriobot.com.
+const INSTRUCTIONS = `The Quriobot API, as the user whose API key the server holds: whatever they can do in control.quriobot.com.
 - Find an endpoint with find_endpoints, see its parameters and body with describe_endpoint, then call it with read (GET, and the POST lists) or write (everything else).
 - Almost every call needs the organisation's id as "organisation": organisations/list with {"search": "<name or e-mail>"} finds it.
 - Lists are POST <resource>/list with page_size, page_number, sort_on, sort_order and filters, and answer count, has_next_page and items.
@@ -29,7 +29,7 @@ const INSTRUCTIONS = `Quriobot's backoffice API, as the user whose API key the s
 const tools = [
   {
     name: 'find_endpoints',
-    description: 'Search the Quriobot backoffice API (its public Swagger spec) for endpoints by words in their path, summary or tag, e.g. "live chat messages" or "bot responses". Returns method, path and summary.',
+    description: 'Search the Quriobot API (its public Swagger spec) for endpoints by words in their path, summary or tag, e.g. "live chat messages" or "bot responses". Returns method, path and summary.',
     inputSchema: { type: 'object', properties: { query: { type: 'string' } }, required: ['query'] },
     annotations: { readOnlyHint: true, openWorldHint: false },
   },
@@ -45,13 +45,13 @@ const tools = [
   },
   {
     name: 'read',
-    description: 'Read from the backoffice API: a GET, or a POST to a list ("…/list"). Changes nothing.',
+    description: 'Read from the Quriobot API: a GET, or a POST to a list ("…/list"). Changes nothing.',
     inputSchema: callSchema(false),
     annotations: { readOnlyHint: true, openWorldHint: true },
   },
   {
     name: 'write',
-    description: 'Change something through the backoffice API: POST, PATCH, PUT or DELETE. Customers may see the result (a chat message is sent to them); bulk actions without "ids" act on everything the filters select.',
+    description: 'Change something through the Quriobot API: POST, PATCH, PUT or DELETE. Customers may see the result (a chat message is sent to them); bulk actions without "ids" act on everything the filters select.',
     inputSchema: callSchema(true),
     annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: true },
   },
