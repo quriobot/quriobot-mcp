@@ -1,6 +1,6 @@
 {
   "name": "@quriobot/mcp",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Your Quriobot account as MCP tools for any AI agent, through the Quriobot API and your own API key",
   "type": "module",
   "bin": {

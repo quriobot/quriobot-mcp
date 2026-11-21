@@ -112,6 +112,10 @@ Other clients ask before each tool call by default, or let you allow tools one b
 
 ## Good to know
 
+- Ask for only the fields you need: every endpoint takes a `fields` query parameter in Google's
+  partial-response syntax (`count,items(id,number,subject)`, `a/b`, `*`), which the server passes
+  through `read`'s `query`. A list of chats is a few kilobytes that way instead of up to 50 KB a
+  chat. Your agent is told this; you can ask it to as well.
 - Almost every call needs your organisation's id. Ask the agent to find it, or copy it from
   control.quriobot.com: it is the part of the address after the host.
 - Bulk actions (closing, assigning or marking chats as spam) act on everything their filters
